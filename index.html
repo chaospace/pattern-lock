@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>pattern-lock</title>
+    <!--[if IE]><script type="text/javascript" src="./js/excanvas.js"></script><![endif]-->
+    <style>
+    
+        html,body{
+            margin:5;
+            padding:0;
+            background:black;
+            color:white;
+            font:65.5%;
+        }
+        
+        #snapshot-layer{
+            position:absolute;
+            z-index:1;
+        }
+        
+        #point-layer{
+            position:absolute;
+            z-index:2;
+            background:black;
+        }
+        
+        #focus-layer{
+            position:absolute;
+            z-index:3;
+        }
+        
+       #line-layer{
+            position:absolute;
+            z-index:4;
+        }
+        
+        div#lock-container{
+            position:relative;
+            width:320px;
+            height:480px;
+            overflow:hidden;
+            cursor:pointer;
+        }
+        
+        a#download{
+            cursor:pointer;
+            color:white;
+        }
+        
+        div#container{
+            position:relative;
+            width:320px;
+            height:480px;
+            border:1px solid green;
+            margin: 30px auto;
+        }
+        
+    </style>
+</head>
+<body>
+    
+    <h2>Pattern-Lock</h2>
+    <p>touch를 통한 패턴 인식 기능 구현</p>
+    <div id="container">
+        <div id="lock-container">
+        </div>
+        <a id="download" download="snapshot.jpg">다운로드 이미지</a>
+    </div>
+    
+    <script src="./js/pattern-lock-comp.js"></script>
+    <script>
+            var patternLock = new PatternLock({
+            onCreateSnapshot:function(){
+                if( button.style.visibility == "hidden" ){
+                    button.style.visibility = "visible";
+                }
+            }});
+            
+            function onClick_DownLoad(){
+                if(patternLock.snapshotData){
+                   var html="<p>Right-click on image below and Save-Picture-As</p>";
+                   html+="<img src='"+patternLock.snapshotData+"' alt='from canvas'/>";
+                   var tab=window.open();
+                   tab.document.write(html);
+                }
+            };
+            
+            var button = document.getElementById("download");
+            button.style.visibility = "hidden";
+            button.addEventListener("click", onClick_DownLoad );
+            
+    </script>    
+</body>
+</html>

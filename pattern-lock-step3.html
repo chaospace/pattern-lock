@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>pattern-lock</title>
+    <!--[if IE]><script type="text/javascript" src="./js/excanvas.js"></script><![endif]-->
+    <style>
+        
+        html,body{
+            margin:0;
+            padding:0;
+        }
+        
+        #iScreen{
+            background:black;
+        }
+        
+    </style>
+</head>
+<body onload="initApp();">
+    
+    <canvas id="iScreen" width="320" height="480"></canvas>
+    
+    <script>
+    
+        /**
+            STEP3
+            마지막 닷과 마우스 위치를 이어주는 라인 그리기
+            
+            step2
+            마우스 클릭 & 드래그로 변경
+            
+            
+            기본 패턴 점 만들기
+            클릭에 따른 컬러 변경 및 라인 연결 & 초기화
+            
+        */
+        var iScreen;
+        var ctx;
+        var isPress;
+        
+      
+
+       var dotPoints=[
+             {x:50, y:100},
+             {x:150, y:100},
+             {x:250, y:100},
+             {x:50, y:200},
+             {x:150, y:200},
+             {x:250, y:200},
+             {x:50, y:300},
+             {x:150, y:300},
+             {x:250, y:300}
+         ];   
+
+         
+         function drawDot(){
+            
+            var dot;
+            for( var i=0; i<patternDots.length; i++){
+                dot =patternDots[i];
+                ctx.save();
+                ctx.beginPath();
+                ctx.fillStyle=dot.color;
+                ctx.arc( dot.x, dot.y, dot.radius, 0, Math.PI*2);
+                ctx.fill();
+                ctx.restore();
+                ctx.closePath();
+            }
+         }
+         
+         
+         var DOT_RADIUS =5;
+         function createDot( px, py ){
+            var dot={
+                x:px, 
+                y:py,
+                radius:DOT_RADIUS,
+                hitRadius:DOT_RADIUS*4,
+                hit:false,
+                color:'rgba(255, 255, 255, 1)'
+            }
+            return dot;
+         }
+         
+   
+      
+         function onMouseDown_Screen( e ){
+            isPress =true;
+         }
+         
+         function initScreen(){
+            ctx.fillStyle='grba(0, 0, 0, 1)';
+            ctx.fillRect(0, 0, iScreen.width, iScreen.height );
+         }
+         
+         function getDotHitTest( mx, my ){
+           var hitDot =false;
+           for( var i=0; i<patternDots.length; i++ ){
+                var p = patternDots[i];
+                if(p.hit)continue;
+                if( mx >= (p.x-p.hitRadius) && mx <= (p.x+p.hitRadius) &&
+                    my >= (p.y-p.hitRadius) && my <= (p.y+p.hitRadius) ){
+                        hitDots.push(p);
+                        p.hit=true;
+                        p.color ='rgba(255, 100, 0, 1)';
+                        hitDot = true;
+                    }
+            }
+            
+            return hitDot;
+            
+         }
+         
+         
+         function initDotState(){
+             for( var i=0; i<patternDots.length; i++ ){
+                var p = patternDots[i];                
+                p.hit=false;
+                p.color ='rgba(255, 255, 255, 1)';
+            }
+            hitDots=[];
+         }
+         
+         function drawLine(){
+            
+            var hitDot;
+            var prevDot;
+            for( var i=0; i<hitDots.length; i++ ) {
+            
+                hitDot  = hitDots[i];
+                ctx.save();
+                if( prevDot ){
+                    ctx.beginPath();
+                    ctx.strokeStyle = "rgba( 255, 100, 0, 1)";
+                    ctx.lineWidth   = 2;
+                    ctx.moveTo( prevDot.x, prevDot.y );
+                    ctx.lineTo( hitDot.x, hitDot.y );
+                    ctx.stroke();
+                    ctx.closePath();
+                }
+                ctx.restore();
+                prevDot = hitDot;
+                
+            }
+         
+         }
+         
+         function drawFocusLine(mx, my){
+            var focus = hitDots[hitDots.length-1];
+            ctx.save();
+            ctx.beginPath();
+            ctx.strokeStyle = "rgba( 255, 255, 255, 0.5)";
+            ctx.lineWidth   = 3;
+            ctx.moveTo( focus.x, focus.y );
+            ctx.lineTo( mx, my );
+            ctx.stroke();
+            ctx.closePath();
+            ctx.restore();
+         }
+         
+         
+         var hitDots=[];
+         var patternDots=[];
+         for( var i=0; i<dotPoints.length; i++ ){
+            var p = dotPoints[i];
+            patternDots.push(createDot( p.x, p.y ));
+         }
+         
+         
+         
+         function onMouseMove_Screen( e ){
+            if( isPress ){
+               var hit = getDotHitTest( e.clientX, e.clientY );
+                initScreen();
+                drawDot()
+                drawLine();
+            }
+            
+            if( hitDots.length> 0 ){
+                drawFocusLine( e.clientX, e.clientY );
+            }
+            
+         }
+         
+         function onMouseUp_Screen( e ){
+            isPress = false;
+            initDotState();
+            initScreen();
+            drawDot();
+         }
+         
+         
+                  
+         function addEvent(evnt, elem, func) {
+           if (elem.addEventListener)  // W3C DOM
+              elem.addEventListener(evnt,func,false);
+           else if (elem.attachEvent) { // IE DOM
+              elem.attachEvent("on"+evnt, func);
+           }
+           else { // No much to do
+              elem[evnt] = func;
+           }
+        }
+        
+        
+         function initApp(){
+            iScreen = document.getElementById("iScreen");
+            ctx     = iScreen.getContext("2d");
+            drawDot();
+            addEvent( "mousedown", document, onMouseDown_Screen );
+            addEvent( "mousemove", iScreen, onMouseMove_Screen );
+            addEvent( "mouseup", document, onMouseUp_Screen );
+           
+         }
+         
+
+    </script>    
+</body>
+</html>
